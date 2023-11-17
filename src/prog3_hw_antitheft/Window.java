@@ -54,21 +54,21 @@ public class Window extends JFrame{
 		
 		//status panel
 		JPanel statusPanel = new JPanel();
-		JLabel statusTitleLabel = new JLabel("Status viewer",SwingConstants.CENTER);
+		JLabel statusTitleLabel = new JLabel("System Status:",SwingConstants.CENTER);
 		JLabel enginerunningLabel = new JLabel("Engine",SwingConstants.CENTER);
 		JLabel engineFeedBackLabel = new JLabel("n/a",SwingConstants.CENTER);
-		JLabel placeholder = new JLabel("",SwingConstants.CENTER);
+		JLabel masterStatus = new JLabel("ACTIVE",SwingConstants.CENTER);
 		JLabel leftDoorTitleLabel = new JLabel("Left door",SwingConstants.CENTER);
 		JLabel leftDoorStatus = new JLabel("n/a",SwingConstants.CENTER);
 		JLabel rightDoorTitleLabel = new JLabel("Right door",SwingConstants.CENTER);
 		JLabel rightDoorStatus = new JLabel("n/a",SwingConstants.CENTER);
 		JLabel hoodTitleLabel = new JLabel("Hood",SwingConstants.CENTER);
 		JLabel hoodStatus = new JLabel("n/a",SwingConstants.CENTER);
-		JLabel alarmStatusTitleLabel = new JLabel("Alarm",SwingConstants.CENTER);
+		JLabel alarmStatusTitleLabel = new JLabel("Alarm Siren",SwingConstants.CENTER);
 		JLabel alarmStatus = new JLabel("n/a",SwingConstants.CENTER);
 		
 		
-		placeholder.setOpaque(true);
+		masterStatus.setOpaque(true);
 		statusTitleLabel.setOpaque(true);
 		enginerunningLabel.setOpaque(true);
 		engineFeedBackLabel.setOpaque(true);
@@ -81,12 +81,13 @@ public class Window extends JFrame{
 		alarmStatusTitleLabel.setOpaque(true);
 		alarmStatus.setOpaque(true);
 		
+		
 		statusPanel.setBackground(Color.DARK_GRAY);
 		statusPanel.setLayout(new GridLayout(7,2));
 		statusPanel.setBounds(0,0,200,400);
 		//status labels
 		statusPanel.add(statusTitleLabel);
-		statusPanel.add(placeholder);
+		statusPanel.add(masterStatus);
 		statusPanel.add(enginerunningLabel);
 		statusPanel.add(engineFeedBackLabel);
 		statusPanel.add(leftDoorTitleLabel);
