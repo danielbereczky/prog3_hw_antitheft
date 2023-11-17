@@ -7,6 +7,7 @@ public class IgnitionKey {
 		ACC,
 		START
 	}
+	
 	private keyState ignStatus;
 	private boolean isEnabled;
 	
