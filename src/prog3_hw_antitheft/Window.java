@@ -19,7 +19,7 @@ import javax.swing.SwingConstants;
 public class Window extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 4601973850611220034L;
 	public boolean isActive = true;
-	public boolean engineRunning = false;
+	public Engine carEngine = new Engine();
 	//buttons for inputs
 	JRadioButton leftDoorBtn ;
 	JRadioButton rightDoorBtn;
@@ -145,9 +145,15 @@ public class Window extends JFrame implements ActionListener{
 					alarmStatus.setText(siren.getStatusString());
 					hintText.setText("You turned the key while the system was armed. Enter the code to disarm the system!");
 				}
+				//in real life, the ignition cylinder has a spring in it, which returns the key to "ACC" from "START" in order to avoid cranking while the engine is running. This behavior is coded here
 				if(e.getSource()==keyOff) {
 					keyStatus.setText("LOCK");
 					key.setState(IgnitionKey.keyState.OFF);
+					if(carEngine.getStatus()){
+						carEngine.stop();
+						engineFeedBackLabel.setText(carEngine.getStatusString());
+						hintText.setText("The engine is now off");
+					}
 				}
 				else if(e.getSource()==keyAcc) {
 					keyStatus.setText("ACC");
@@ -156,6 +162,26 @@ public class Window extends JFrame implements ActionListener{
 				else if(e.getSource()==keyStart) {
 					keyStatus.setText("START");
 					key.setState(IgnitionKey.keyState.START);
+					//if the alarm is not armed and the engine is not running, we can start it up
+					if(!isActive && !carEngine.getStatus()){
+						carEngine.start();
+						engineFeedBackLabel.setText(carEngine.getStatusString());
+						hintText.setText("The engine is now started");
+						key.setState(IgnitionKey.keyState.ACC);
+						keyStatus.setText("ACC");
+						keyAcc.setSelected(true);
+					}
+					else if(carEngine.getStatus()){
+						hintText.setText("Don't crank while the engine is running!");
+						key.setState(IgnitionKey.keyState.ACC);
+						keyStatus.setText("ACC");
+						keyAcc.setSelected(true);
+					}
+					else{
+						key.setState(IgnitionKey.keyState.ACC);
+						keyStatus.setText("ACC");
+						keyAcc.setSelected(true);
+					}
 				}	
 			}
 		};
@@ -187,7 +213,7 @@ public class Window extends JFrame implements ActionListener{
 		statusPanel = new JPanel();
 		statusTitleLabel = new JLabel("System Status:",SwingConstants.CENTER);
 		enginerunningLabel = new JLabel("Engine",SwingConstants.CENTER);
-		engineFeedBackLabel = new JLabel("OFF",SwingConstants.CENTER);
+		engineFeedBackLabel = new JLabel(carEngine.getStatusString(),SwingConstants.CENTER);
 		masterStatus = new JLabel("ARMED",SwingConstants.CENTER);
 		leftDoorTitleLabel = new JLabel("Left door",SwingConstants.CENTER);
 		leftDoorStatus = new JLabel(leftDoorSwitch.getStatusString(),SwingConstants.CENTER);
