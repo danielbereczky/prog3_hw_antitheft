@@ -1,12 +1,18 @@
 package prog3_hw_antitheft;
 
 public class Switch {
-	private boolean isClosed;
+	private boolean isOpen;
 	//setters and getters
+	Switch(){
+		isOpen = false;
+	}
 	boolean getSwitchState(){
-		return isClosed;
+		return isOpen;
 	}
 	void setSwitchState(boolean inp) {
-		isClosed = inp;
+		isOpen = inp;
+	}
+	String getStatusString() {
+		return isOpen? "Open" : "Closed";
 	}
 }
