@@ -8,7 +8,7 @@ public class IgnitionKey {
 		START
 	}
 	
-	private keyState ignStatus;
+	private keyState ignStatus = keyState.OFF;
 	private boolean isEnabled;
 	
 	public keyState getState() {

@@ -1,19 +1,25 @@
 package prog3_hw_antitheft;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 //todo and ideas: configurable driver side, simple graphics, user manual
 
 public class Window extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 4601973850611220034L;
+	public boolean isActive = true;
+	public boolean engineRunning = false;
 	//buttons for inputs
 	JRadioButton leftDoorBtn ;
 	JRadioButton rightDoorBtn;
@@ -39,12 +45,22 @@ public class Window extends JFrame implements ActionListener{
 	JLabel alarmStatus;
 	JLabel keyStatus;
 	JLabel keyStatusTitleLabel;
-
+	CountdownTimer timer;
 	
+	JLabel hintText;
+	
+	JTextField codeField;
+
 	//components of the system
 	Switch hoodSwitch = new Switch();
 	Switch leftDoorSwitch = new Switch();
 	Switch rightDoorSwitch = new Switch();
+	
+	IgnitionKey key = new IgnitionKey();
+	AlarmSiren siren = new AlarmSiren();
+	
+	String code = "asd";
+	String lastEnteredCode;
 	Window(){
 		
 		leftDoorBtn = new JRadioButton("Left Door");
@@ -65,6 +81,7 @@ public class Window extends JFrame implements ActionListener{
 						hoodStatus.setText(hoodSwitch.getStatusString());
 					}
 				}
+				checkAlarm();
 			}
 		};
 		hoodBtn.addActionListener(hoodListener);
@@ -80,6 +97,7 @@ public class Window extends JFrame implements ActionListener{
 						leftDoorSwitch.setSwitchState(true);
 						leftDoorStatus.setText(leftDoorSwitch.getStatusString());
 				}
+				checkAlarm();
 			}
 		};
 		leftDoorBtn.addActionListener(lDoorListener);
@@ -95,6 +113,7 @@ public class Window extends JFrame implements ActionListener{
 						rightDoorSwitch.setSwitchState(true);
 						rightDoorStatus.setText(rightDoorSwitch.getStatusString());
 				}
+				checkAlarm();
 			}
 		};
 		rightDoorBtn.addActionListener(rDoorListener);
@@ -119,17 +138,24 @@ public class Window extends JFrame implements ActionListener{
 		
 		ActionListener keyListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e){
+				if(isActive){
+					//if the key is touched with an armed system, we give an instant alarm
+					timer = new CountdownTimer(0,siren,alarmStatus);
+					siren.setSiren(true);
+					alarmStatus.setText(siren.getStatusString());
+					hintText.setText("You turned the key while the system was armed. Enter the code to disarm the system!");
+				}
 				if(e.getSource()==keyOff) {
-					System.out.println("The key is OFF");
 					keyStatus.setText("LOCK");
+					key.setState(IgnitionKey.keyState.OFF);
 				}
 				else if(e.getSource()==keyAcc) {
-					System.out.println("The key is in ACC pos");
 					keyStatus.setText("ACC");
+					key.setState(IgnitionKey.keyState.ACC);
 				}
 				else if(e.getSource()==keyStart) {
-					System.out.println("Cranking...");
 					keyStatus.setText("START");
+					key.setState(IgnitionKey.keyState.START);
 				}	
 			}
 		};
@@ -161,8 +187,8 @@ public class Window extends JFrame implements ActionListener{
 		statusPanel = new JPanel();
 		statusTitleLabel = new JLabel("System Status:",SwingConstants.CENTER);
 		enginerunningLabel = new JLabel("Engine",SwingConstants.CENTER);
-		engineFeedBackLabel = new JLabel("n/a",SwingConstants.CENTER);
-		masterStatus = new JLabel("ACTIVE",SwingConstants.CENTER);
+		engineFeedBackLabel = new JLabel("OFF",SwingConstants.CENTER);
+		masterStatus = new JLabel("ARMED",SwingConstants.CENTER);
 		leftDoorTitleLabel = new JLabel("Left door",SwingConstants.CENTER);
 		leftDoorStatus = new JLabel(leftDoorSwitch.getStatusString(),SwingConstants.CENTER);
 		rightDoorTitleLabel = new JLabel("Right door",SwingConstants.CENTER);
@@ -170,7 +196,7 @@ public class Window extends JFrame implements ActionListener{
 		hoodTitleLabel = new JLabel("Hood",SwingConstants.CENTER);
 		hoodStatus = new JLabel(hoodSwitch.getStatusString(),SwingConstants.CENTER);
 		alarmStatusTitleLabel = new JLabel("Alarm Siren",SwingConstants.CENTER);
-		alarmStatus = new JLabel("n/a",SwingConstants.CENTER);
+		alarmStatus = new JLabel(siren.getStatusString(),SwingConstants.CENTER);
 		keyStatusTitleLabel = new JLabel("Ignition key",SwingConstants.CENTER);
 		keyStatus = new JLabel("LOCK",SwingConstants.CENTER);
 		
@@ -222,14 +248,73 @@ public class Window extends JFrame implements ActionListener{
 		keyPanel.add(keyAcc);
 		keyPanel.add(keyStart);
 		
+		//code panel
+		JPanel codePanel = new JPanel();
+		codeField = new JTextField();
+		codeField.setColumns(10);
+		JButton submitButton = new JButton("OK");
+		submitButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e){
+				lastEnteredCode = codeField.getText();
+				System.out.println(lastEnteredCode);
+				//if the siren is already running or the timer is counting down
+				if((siren.getStatus() || timer.isRunning()) &&  lastEnteredCode.equals(code)){
+					//the system is disarmed
+					timer.stop();
+					siren.setSiren(false);
+					alarmStatus.setText(siren.getStatusString());
+					isActive = false;
+					masterStatus.setText("DISARMED");
+					hintText.setText("System disarmed. You can go ahead and start the engine.");
+				}
+			}
+		});
+		
+		codePanel.add(new JLabel("Enter code"));
+		codePanel.add(codeField);
+		codePanel.add(submitButton);
+		codePanel.setBounds(220,140,200,60);
+		
+		//hint panel
+		JPanel hintPanel = new JPanel();
+		hintPanel.setLayout(new FlowLayout());
+		JLabel hintLabel = new JLabel("HINT: ");
+		hintText = new JLabel("The car is locked, the system is armed. Try opening a door first!");
+		hintPanel.add(hintLabel);
+		hintPanel.add(hintText);
+		hintPanel.setBounds(0, 410,650, 30);
+		
 		//adding the panels to the frame
 		this.add(inputPanel);
 		this.add(statusPanel);
 		this.add(keyPanel);
-		//ALWAYS KEEP THIS AT THE END!!!
+		this.add(codePanel);
+		this.add(hintPanel);
+		//only set the JFrame visible after all elements are added
 		this.setVisible(true);
 	}
 	public void actionPerformed(ActionEvent e) {
 		//empty
+	}
+	//logic functions
+	public void checkAlarm() {
+		//when the system is active, we need to check for triggering conditions
+		if(isActive){
+			if(hoodSwitch.getSwitchState()) {
+				//workaround, we have an instant alarm in case the hood is opened
+				timer = new CountdownTimer(0,siren,alarmStatus);
+				siren.setSiren(true);
+				alarmStatus.setText(siren.getStatusString());
+				hintText.setText("You opened the hood while the system was armed. Enter the code to disarm the system!");
+			}
+			//if we opened any of the doors while the system is active
+			else if(leftDoorSwitch.getSwitchState() || rightDoorSwitch.getSwitchState()) {
+				hintText.setText("You opened a door. Enter the code in 30 seconds to disarm the system!");
+				//countdown
+				timer = new CountdownTimer(3,siren,alarmStatus);
+				timer.start();
+			}
+		}
 	}
 }
