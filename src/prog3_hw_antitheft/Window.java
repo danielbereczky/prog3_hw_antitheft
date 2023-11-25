@@ -4,6 +4,14 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -127,9 +135,37 @@ public class Window extends JFrame implements ActionListener{
 		//styling
 		this.getContentPane().setBackground(Color.DARK_GRAY);
 		
-		//input panel
-		JPanel inputPanel = new JPanel();
-		JLabel inputTitleLabel = new JLabel("Openable inputs:",SwingConstants.CENTER);
+		
+		//IO panel
+		JPanel IOPanel = new JPanel();
+		JLabel IOLabel = new JLabel("Save/Load state",SwingConstants.CENTER);
+		IOLabel.setOpaque(true);
+		IOPanel.setBackground(Color.DARK_GRAY);
+		IOPanel.setLayout(new GridLayout(0,1));
+		IOPanel.setBounds(440,300,200,100);
+		IOPanel.add(IOLabel);
+		
+		JButton loadBtn = new JButton("Load");
+		JButton writeBtn = new JButton("Save");
+		
+		loadBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try{
+					read();
+				}
+				catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+		});
+		writeBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				write();
+			}
+		});
+		IOPanel.add(writeBtn);
+		IOPanel.add(loadBtn);
 		
 		//Key
 		keyOff = new JRadioButton("LOCK");
@@ -197,6 +233,10 @@ public class Window extends JFrame implements ActionListener{
 		keyOff.addActionListener(keyListener);
 		keyAcc.addActionListener(keyListener);
 		keyStart.addActionListener(keyListener);
+		
+		//input panel
+		JPanel inputPanel = new JPanel();
+		JLabel inputTitleLabel = new JLabel("Openable inputs:",SwingConstants.CENTER);
 		//setting up the input panel for doors, and hood
 		inputTitleLabel.setOpaque(true);
 		inputPanel.setBackground(Color.DARK_GRAY);
@@ -317,6 +357,7 @@ public class Window extends JFrame implements ActionListener{
 		this.add(keyPanel);
 		this.add(codePanel);
 		this.add(hintPanel);
+		this.add(IOPanel);
 		//only set the JFrame visible after all elements are added
 		this.setVisible(true);
 	}
@@ -342,5 +383,88 @@ public class Window extends JFrame implements ActionListener{
 				timer.start();
 			}
 		}
+	}
+	public void write(){
+		try{
+			//initializing the output data stream
+			FileOutputStream fileOut = new FileOutputStream("alarm.ser");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			//writing the objects to the file
+			out.writeObject(isActive);
+			out.writeObject(code);
+			out.writeObject(lastEnteredCode);
+			out.writeObject(hoodSwitch);
+			out.writeObject(leftDoorSwitch);
+			out.writeObject(rightDoorSwitch);
+			out.writeObject(key);
+			out.writeObject(siren);
+			out.close();
+			hintText.setText("System state saved");
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	public void read()throws ClassNotFoundException{
+		//checking whether the file to read from exists
+		Path inpPath = Paths.get("alarm.ser");
+		if(Files.exists(inpPath)){
+			//if the file exists
+			try{
+				//initializing the data stream
+				FileInputStream fileIn = new FileInputStream("alarm.ser");
+				ObjectInputStream in = new ObjectInputStream(fileIn);
+				//reading objects and setting feedback
+				isActive = (Boolean) in.readObject();
+				if(isActive){
+					masterStatus.setText("ARMED");
+				}
+				else{
+					 masterStatus.setText("DISARMED");
+				}
+				code = (String) in.readObject();
+				lastEnteredCode = (String) in.readObject();
+				hoodSwitch = (Switch) in.readObject();
+				hoodStatus.setText(hoodSwitch.getStatusString());
+				if(hoodSwitch.getSwitchState()){
+					hoodBtn.setSelected(true);
+				}
+				leftDoorSwitch = (Switch) in.readObject();
+				if(leftDoorSwitch.getSwitchState()){
+					leftDoorBtn.setSelected(true);
+				}
+				leftDoorStatus.setText(leftDoorSwitch.getStatusString());
+				rightDoorSwitch = (Switch) in.readObject();
+				if(rightDoorSwitch.getSwitchState()){
+					rightDoorBtn.setSelected(true);
+				}
+				rightDoorStatus.setText(rightDoorSwitch.getStatusString());
+				
+				key = (IgnitionKey) in.readObject();
+				if(key.getState() == IgnitionKey.keyState.OFF){
+					keyOff.setSelected(true);
+					keyStatus.setText("OFF");
+					}
+				else if(key.getState() == IgnitionKey.keyState.ACC){
+					 keyAcc.setSelected(true);
+					 keyStatus.setText("ACC");
+				}
+				else if(key.getState() == IgnitionKey.keyState.START){
+					keyStart.setSelected(true);
+					keyStatus.setText("START");
+				}
+				
+				siren = (AlarmSiren) in.readObject();
+				alarmStatus.setText(siren.getStatusString());
+				in.close();
+				//giving feedback to the user
+				hintText.setText("System state loaded");
+			}
+			catch(IOException e){
+				e.printStackTrace();
+			}
+		}
+		else hintText.setText("No save found!");
+			
 	}
 }

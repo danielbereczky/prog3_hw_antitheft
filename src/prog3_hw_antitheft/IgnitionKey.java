@@ -1,9 +1,11 @@
 package prog3_hw_antitheft;
 
-public class IgnitionKey {
+import java.io.Serializable;
+
+public class IgnitionKey implements Serializable{
+	private static final long serialVersionUID = -8121539382114570081L;
 	public enum keyState{
 		OFF,
-		ON,
 		ACC,
 		START
 	}

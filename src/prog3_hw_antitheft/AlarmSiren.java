@@ -1,6 +1,9 @@
 package prog3_hw_antitheft;
 
-public class AlarmSiren {
+import java.io.Serializable;
+
+public class AlarmSiren implements Serializable{
+	private static final long serialVersionUID = 2581134307456467085L;
 	boolean isOn;
 	AlarmSiren(){
 		isOn = false;

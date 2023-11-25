@@ -1,6 +1,9 @@
 package prog3_hw_antitheft;
 
-public class Switch {
+import java.io.Serializable;
+
+public class Switch implements Serializable{
+	private static final long serialVersionUID = 7000668541991691495L;
 	private boolean isOpen;
 	//setters and getters
 	Switch(){

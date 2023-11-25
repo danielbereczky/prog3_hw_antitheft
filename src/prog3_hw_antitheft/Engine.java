@@ -1,6 +1,9 @@
 package prog3_hw_antitheft;
 
-public class Engine {
+import java.io.Serializable;
+
+public class Engine implements Serializable{
+	private static final long serialVersionUID = -4793174854522421161L;
 	private boolean isRunning = false;
 	public void start(){
 		if(!isRunning){
