@@ -1,7 +1,4 @@
 package prog3_hw_antitheft;
-import java.util.Timer;
-import java.util.TimerTask;
-import javax.swing.JLabel;
 
 public class AlarmSiren {
 	boolean isOn;
