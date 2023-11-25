@@ -286,7 +286,7 @@ public class Window extends JFrame implements ActionListener{
 				System.out.println(lastEnteredCode);
 				//if the siren is already running or the timer is counting down
 				if((siren.getStatus() || timer.isRunning()) &&  lastEnteredCode.equals(code)){
-					//the system is disarmed
+					//disarming the system
 					timer.stop();
 					siren.setSiren(false);
 					alarmStatus.setText(siren.getStatusString());
@@ -323,7 +323,7 @@ public class Window extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		//empty
 	}
-	//logic functions
+	//logic for triggering the alarm
 	public void checkAlarm() {
 		//when the system is active, we need to check for triggering conditions
 		if(isActive){
