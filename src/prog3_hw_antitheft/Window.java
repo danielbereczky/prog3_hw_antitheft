@@ -22,12 +22,12 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-//todo and ideas: configurable driver side, simple graphics, user manual
+//TODO and ideas: configurable driver side, simple graphics, user manual
 
 public class Window extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 4601973850611220034L;
 	public boolean isActive = true;
-	public Engine carEngine = new Engine();
+	
 	//buttons for inputs
 	JRadioButton leftDoorBtn ;
 	JRadioButton rightDoorBtn;
@@ -66,6 +66,7 @@ public class Window extends JFrame implements ActionListener{
 	
 	IgnitionKey key = new IgnitionKey();
 	AlarmSiren siren = new AlarmSiren();
+	public Engine carEngine = new Engine();
 	
 	String code = "asd";
 	String lastEnteredCode;
@@ -351,6 +352,41 @@ public class Window extends JFrame implements ActionListener{
 		hintPanel.add(hintText);
 		hintPanel.setBounds(0, 410,650, 30);
 		
+		//help panel		
+		JPanel helpPanel = new JPanel();
+		JButton helpBtn = new JButton("Instructions");
+		helpPanel.setBackground(Color.DARK_GRAY);
+		helpPanel.setLayout(new GridLayout(0,1));
+		helpPanel.setBounds(440,200,200,40);
+		helpBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e){
+				Manual usrMan = new Manual();
+			}
+		});
+		helpPanel.add(helpBtn);
+		
+		//arming panel	
+		JPanel armPanel = new JPanel();
+		JButton armBtn = new JButton("Arm alarm system");
+		armPanel.setBackground(Color.DARK_GRAY);
+		armPanel.setLayout(new GridLayout(0,1));
+		armPanel.setBounds(440,250,200,40);
+		armBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e){
+				if(armable()){
+					isActive = true;
+					masterStatus.setText("ARMED");
+					hintText.setText("System successfully armed");
+				}
+				else{
+					hintText.setText("The system cannot be armed now");
+				}
+			}
+		});
+		armPanel.add(armBtn);
+		
 		//adding the panels to the frame
 		this.add(inputPanel);
 		this.add(statusPanel);
@@ -358,8 +394,16 @@ public class Window extends JFrame implements ActionListener{
 		this.add(codePanel);
 		this.add(hintPanel);
 		this.add(IOPanel);
+		this.add(helpPanel);
+		this.add(armPanel);
 		//only set the JFrame visible after all elements are added
 		this.setVisible(true);
+	}
+	public boolean armable(){
+		if(!isActive && !carEngine.getStatus() && !hoodSwitch.getSwitchState() && !leftDoorSwitch.getSwitchState() && !rightDoorSwitch.getSwitchState() && key.getState()==IgnitionKey.keyState.OFF){
+			return true;
+		}
+		return false;
 	}
 	public void actionPerformed(ActionEvent e) {
 		//empty
@@ -398,6 +442,7 @@ public class Window extends JFrame implements ActionListener{
 			out.writeObject(rightDoorSwitch);
 			out.writeObject(key);
 			out.writeObject(siren);
+			out.writeObject(carEngine);
 			out.close();
 			hintText.setText("System state saved");
 		}
@@ -456,6 +501,8 @@ public class Window extends JFrame implements ActionListener{
 				
 				siren = (AlarmSiren) in.readObject();
 				alarmStatus.setText(siren.getStatusString());
+				carEngine = (Engine) in.readObject();
+				engineFeedBackLabel.setText(carEngine.getStatusString());
 				in.close();
 				//giving feedback to the user
 				hintText.setText("System state loaded");
