@@ -49,6 +49,7 @@ public class Window extends JFrame implements ActionListener{
 	JPanel codePanel;
 	JPanel hintPanel;
 	JPanel helpPanel;
+	JPanel codeChangePanel;
 	//feedback labels
 	JLabel statusTitleLabel;
 	JLabel enginerunningLabel;
@@ -65,6 +66,7 @@ public class Window extends JFrame implements ActionListener{
 	JLabel keyStatus;
 	JLabel keyStatusTitleLabel;
 	CountdownTimer timer;
+	EngineTimer engTimer;
 	
 	JLabel hintText;
 	
@@ -104,29 +106,7 @@ public class Window extends JFrame implements ActionListener{
 		setCodePanel();
 		setHintPanel();
 		setHelpPanel();
-		
-		//code change panel
-		JPanel codeChangePanel = new JPanel();
-		codeChangePanel.setBackground(Color.DARK_GRAY);
-		codeChangePanel.setBounds(240,365,170,40);
-		JButton changeCode = new JButton("Change system code");
-		
-		changeCode.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-		        final NewCode newc = new NewCode(code);
-		        // Wait for the NewCode window to be disposed before updating the code
-		        newc.addWindowListener(new WindowAdapter() {
-		            @Override
-		            public void windowClosed(WindowEvent e) {
-		                code = newc.getUpdatedCode();
-		                writeCode();
-		            }
-		        });
-		    }
-		});
-		codeChangePanel.add(changeCode);
-		
+		codeChangePanel();
 		//adding the panels to the frame
 		this.add(inputPanel);
 		this.add(statusPanel);
@@ -402,6 +382,7 @@ public class Window extends JFrame implements ActionListener{
 				codePanel = new JPanel();
 				codeField = new JPasswordField();
 				codeField.setColumns(10);
+				engTimer = new EngineTimer(10,carEngine);
 				JButton submitButton = new JButton("OK");
 				submitButton.addActionListener(new ActionListener() {
 					@Override
@@ -418,6 +399,9 @@ public class Window extends JFrame implements ActionListener{
 							isActive = false;
 							masterStatus.setText("DISARMED");
 							hintText.setText("System disarmed. You can go ahead and start the engine.");
+							carEngine.setStartable(true);
+							engTimer = new EngineTimer(10,carEngine);
+							engTimer.start();
 						}
 					}
 				});
@@ -453,8 +437,30 @@ public class Window extends JFrame implements ActionListener{
 		});
 		helpPanel.add(helpBtn);
 	}
-	
-	
+	public void codeChangePanel() {
+		//code change panel
+		codeChangePanel = new JPanel();
+		codeChangePanel.setBackground(Color.DARK_GRAY);
+		codeChangePanel.setBounds(240,365,170,40);
+		JButton changeCode = new JButton("Change system code");
+		
+		changeCode.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        final NewCode newc = new NewCode(code);
+		        // Wait for the NewCode window to be disposed before updating the code
+		        newc.addWindowListener(new WindowAdapter() {
+		            @Override
+		            public void windowClosed(WindowEvent e) {
+		                code = newc.getUpdatedCode();
+		                writeCode();
+		            }
+		        });
+		    }
+		});
+		codeChangePanel.add(changeCode);
+	}
+
 	public boolean armable(){
 		if(!isActive && !carEngine.getStatus() && !hoodSwitch.getSwitchState() && !leftDoorSwitch.getSwitchState() && !rightDoorSwitch.getSwitchState() && key.getState()==IgnitionKey.keyState.OFF){
 			return true;
@@ -479,7 +485,7 @@ public class Window extends JFrame implements ActionListener{
 			else if(leftDoorSwitch.getSwitchState() || rightDoorSwitch.getSwitchState()) {
 				hintText.setText("You opened a door. Enter the code in 30 seconds to disarm the system!");
 				//countdown
-				timer = new CountdownTimer(3,siren,alarmStatus);
+				timer = new CountdownTimer(30,siren,alarmStatus);
 				timer.start();
 			}
 		}
@@ -552,7 +558,6 @@ public class Window extends JFrame implements ActionListener{
 					keyStart.setSelected(true);
 					keyStatus.setText("START");
 				}
-				
 				siren = (AlarmSiren) in.readObject();
 				alarmStatus.setText(siren.getStatusString());
 				carEngine = (Engine) in.readObject();
@@ -578,7 +583,7 @@ public class Window extends JFrame implements ActionListener{
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void readCode() throws ClassNotFoundException{
 		Path inPath = Paths.get("code.cod");
 		if(Files.exists(inPath)) {

@@ -1,3 +1,4 @@
+
 package prog3_hw_antitheft;
 
 import java.awt.FlowLayout;
@@ -22,5 +23,5 @@ public class Manual extends JFrame{
 		this.setVisible(true);
 	}
 	//text for the manual
-	String instructions = new String("<html>INSTRUCTIONS<BR>By default, the doors and the hood are locked. If you open one of the door, you have to enter the access code within 10 seconds, otherwise the alarm starts playing until the correct code is entered<BR>If you open the hood while the alarm is armed, the alarm will start instantly.<BR>After disarming the alarm system by entering the correct code, you can start the engine.<BR>In real life, the ignition key has a spring, which returns the key from START to ACC<BR>In order to arm the system, both doors and the hood has to be closed, and the key has to be in the OFF position");
+	String instructions = new String("<html>INSTRUCTIONS<BR>By default, the doors and the hood are locked. If you open one of the door, you have to enter the access code within 10 seconds, otherwise the alarm starts playing until the correct code is entered<BR>If you open the hood while the alarm is armed, the alarm will start instantly.<BR>After disarming the alarm system by entering the correct code, you can start the engine in 10 seconds. After 10 seconds, you have to enter the code again.<BR>In real life, the ignition key has a spring, which returns the key from START to ACC<BR>In order to arm the system, both doors and the hood has to be closed, and the key has to be in the OFF position");
 }
