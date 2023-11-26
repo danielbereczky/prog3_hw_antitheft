@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 
 public class Manual extends JFrame{
 
+	private static final long serialVersionUID = 12L;
 	Manual(){
 		this.setSize(640,480);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
