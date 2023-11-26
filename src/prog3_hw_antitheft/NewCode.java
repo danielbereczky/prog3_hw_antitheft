@@ -15,6 +15,7 @@ public class NewCode extends JFrame {
         cfgcode = oldc;
         this.setSize(500, 300);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setTitle("Change access code");
         oldC = new JPasswordField(10);
         newC = new JPasswordField(10);
         JLabel oldLabel = new JLabel("Old code:");
