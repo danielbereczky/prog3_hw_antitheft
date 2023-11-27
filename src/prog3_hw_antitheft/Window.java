@@ -6,23 +6,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 
@@ -38,6 +30,7 @@ public class Window extends JFrame implements ActionListener{
 	JRadioButton keyAcc;
 	JRadioButton keyStart;
 	ButtonGroup keyButtons;
+	JComboBox keyBox;
 	//panels
 	JPanel statusPanel;
 	JPanel IOPanel;
@@ -63,7 +56,7 @@ public class Window extends JFrame implements ActionListener{
 	JLabel alarmStatus;
 	JLabel keyStatus;
 	JLabel keyStatusTitleLabel;
-
+	String keySelected;
 	
 	JLabel hintText;
 	
@@ -181,7 +174,7 @@ public class Window extends JFrame implements ActionListener{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try{
-					sysLogic.read(masterStatus, hoodStatus, leftDoorStatus, rightDoorStatus, keyStatus, alarmStatus, engineFeedBackLabel, hintText, hoodBtn, leftDoorBtn, rightDoorBtn, keyOff, keyAcc, keyStart);
+					sysLogic.read(masterStatus, hoodStatus, leftDoorStatus, rightDoorStatus, keyStatus, alarmStatus, engineFeedBackLabel, hintText, hoodBtn, leftDoorBtn, rightDoorBtn, keyBox);
 				}
 				catch(Exception ex){
 					ex.printStackTrace();
@@ -266,36 +259,33 @@ public class Window extends JFrame implements ActionListener{
 				keyOff = new JRadioButton("LOCK");
 				keyAcc = new JRadioButton("ON/ACC");
 				keyStart = new JRadioButton("START");
-				
-				ActionListener keyListener = new ActionListener() {
-					public void actionPerformed(ActionEvent e){
-						//check whether the key was tampered with
-						sysLogic.keyTamperCheck(alarmStatus,hintText);
+				String[] keyStates = {"OFF","ON/ACC","START"};
+				keyBox = new JComboBox(keyStates);
+				ActionListener keyBoxListener = new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
 						//in real life, the ignition cylinder has a spring in it, which returns the key to "ACC" from "START" in order to avoid cranking while the engine is running. This behavior is coded here
-						if(e.getSource()==keyOff) {
-							sysLogic.keyOff(keyStatus, engineFeedBackLabel, hintText);
+						sysLogic.keyTamperCheck(alarmStatus, hintText);
+						if(e.getSource()==keyBox){
+							keySelected = (String) keyBox.getSelectedItem();
 						}
-						else if(e.getSource()==keyAcc) {
-							sysLogic.keyAcc(keyStatus);
+						switch(keySelected){
+							case("OFF"):
+								sysLogic.keyOff(keyStatus, engineFeedBackLabel, hintText);
+								break;
+							case("ON/ACC"):
+								sysLogic.keyAcc(keyStatus);
+								break;
+							case("START"):
+								sysLogic.keyStart(keyStatus,engineFeedBackLabel,hintText);
+								keyBox.setSelectedIndex(1);
+								break;
 						}
-						else if(e.getSource()==keyStart) {
-							sysLogic.keyStart(keyStatus, engineFeedBackLabel, hintText);
-							keyAcc.setSelected(true);
-						}	
 					}
 				};
+				keyBox.setSelectedIndex(0);
+				keyBox.addActionListener(keyBoxListener);
 				
-				//we set the key to LOCK by default
-				keyOff.setSelected(true);
-				//setting up the key panel
-				keyButtons = new ButtonGroup();
-				keyButtons.add(keyOff);
-				keyButtons.add(keyAcc);
-				keyButtons.add(keyStart);
-				//adding the actionListener for keys
-				keyOff.addActionListener(keyListener);
-				keyAcc.addActionListener(keyListener);
-				keyStart.addActionListener(keyListener);
 				
 				keyPanel = new JPanel();
 				JLabel keyTitleLabel = new JLabel("Set key to:",SwingConstants.CENTER);
@@ -304,9 +294,7 @@ public class Window extends JFrame implements ActionListener{
 				keyPanel.setBounds(220,0,200,100);
 				keyPanel.setBackground(Color.DARK_GRAY);
 				keyPanel.add(keyTitleLabel);
-				keyPanel.add(keyOff);
-				keyPanel.add(keyAcc);
-				keyPanel.add(keyStart);
+				keyPanel.add(keyBox);
 	}
 	public void setCodePanel() {
 		//code panel
@@ -331,7 +319,7 @@ public class Window extends JFrame implements ActionListener{
 		hintPanel = new JPanel();
 		hintPanel.setLayout(new FlowLayout());
 		JLabel hintLabel = new JLabel("HINT: ");
-		hintText = new JLabel("The car is locked, the system is armed. Try opening a door first!");
+		hintText = new JLabel("The car is locked, and the alarm system is armed. Try opening a door first!");
 		hintPanel.add(hintLabel);
 		hintPanel.add(hintText);
 		hintPanel.setBounds(0, 410,650, 30);

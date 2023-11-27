@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
@@ -215,7 +216,7 @@ public class Logic {
 			e.printStackTrace();
 		}
 	}
-	public void read(JLabel masterStatus, JLabel hoodStatus, JLabel leftDoorStatus,JLabel rightDoorStatus, JLabel keyStatus, JLabel alarmStatus, JLabel engineFeedBackLabel, JLabel hintText, JRadioButton hoodBtn, JRadioButton leftDoorBtn, JRadioButton rightDoorBtn, JRadioButton keyOff, JRadioButton keyAcc, JRadioButton keyStart)throws ClassNotFoundException{
+	public void read(JLabel masterStatus, JLabel hoodStatus, JLabel leftDoorStatus,JLabel rightDoorStatus, JLabel keyStatus, JLabel alarmStatus, JLabel engineFeedBackLabel, JLabel hintText, JRadioButton hoodBtn, JRadioButton leftDoorBtn, JRadioButton rightDoorBtn,JComboBox keyBox)throws ClassNotFoundException{
 		//checking whether the file to read from exists
 		Path inpPath = Paths.get("alarm.ser");
 		if(Files.exists(inpPath)){
@@ -251,15 +252,15 @@ public class Logic {
 				
 				key = (IgnitionKey) in.readObject();
 				if(key.getState() == IgnitionKey.keyState.OFF){
-					keyOff.setSelected(true);
+					keyBox.setSelectedIndex(0);
 					keyStatus.setText("OFF");
 					}
 				else if(key.getState() == IgnitionKey.keyState.ACC){
-					 keyAcc.setSelected(true);
+					 keyBox.setSelectedIndex(1);
 					 keyStatus.setText("ACC");
 				}
 				else if(key.getState() == IgnitionKey.keyState.START){
-					keyStart.setSelected(true);
+					keyBox.setSelectedIndex(2);
 					keyStatus.setText("START");
 				}
 				siren = (AlarmSiren) in.readObject();
