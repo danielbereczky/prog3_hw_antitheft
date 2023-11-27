@@ -30,6 +30,10 @@ public class Logic {
 	
 	static String code;
 	String lastEnteredCode;
+	//driving the app
+	public static void main(String args[]){
+		Window sysWindow = new Window();
+	}
 	//code setters and getters
 	public String getCode() {
 		return code;
