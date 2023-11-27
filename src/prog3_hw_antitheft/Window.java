@@ -25,7 +25,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-//TODO : logic refactor, code change
+//TODO : OUTSORCING LOGIC TO A SEPARATE JAVA
 
 public class Window extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 4601973850611220034L;
@@ -331,7 +331,7 @@ public class Window extends JFrame implements ActionListener{
 							keyStatus.setText("START");
 							key.setState(IgnitionKey.keyState.START);
 							//if the alarm is not armed and the engine is not running, we can start it up
-							if(!isActive && !carEngine.getStatus()){
+							if(!isActive && !carEngine.getStatus() && carEngine.getStartable()){
 								carEngine.start();
 								engineFeedBackLabel.setText(carEngine.getStatusString());
 								hintText.setText("The engine is now started");
@@ -382,27 +382,28 @@ public class Window extends JFrame implements ActionListener{
 				codePanel = new JPanel();
 				codeField = new JPasswordField();
 				codeField.setColumns(10);
-				engTimer = new EngineTimer(10,carEngine);
+				//engTimer = new EngineTimer(15,carEngine);
 				JButton submitButton = new JButton("OK");
 				submitButton.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e){
+						//if the doors are closed, we can't enter a code because its simply not possible in real life
 						lastEnteredCode = codeField.getText();
 						codeField.setText("");
 						System.out.println(lastEnteredCode);
 						//if the siren is already running or the timer is counting down
-						if((siren.getStatus() || timer.isRunning()) &&  lastEnteredCode.equals(code)){
+						if((siren.getStatus() || (timer != null && timer.isRunning())) &&  lastEnteredCode.equals(code)){
 							//disarming the system
 							timer.stop();
 							siren.setSiren(false);
 							alarmStatus.setText(siren.getStatusString());
 							isActive = false;
 							masterStatus.setText("DISARMED");
-							hintText.setText("System disarmed. You can go ahead and start the engine.");
+							hintText.setText("System disarmed. You can go ahead and start the engine in 15 seconds");
 							carEngine.setStartable(true);
-							engTimer = new EngineTimer(10,carEngine);
+							engTimer = new EngineTimer(15,carEngine,hintText);
 							engTimer.start();
-						}
+						}	
 					}
 				});
 				

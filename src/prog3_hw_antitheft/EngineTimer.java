@@ -11,7 +11,7 @@ public class EngineTimer {
     private Timer timer;
     private boolean running;
 
-    public EngineTimer(int d,final Engine inpEngine) {
+    public EngineTimer(int d,final Engine inpEngine,final JLabel hintLabel) {
         duration = d;
 
         timer = new Timer(1000, new ActionListener() {
@@ -23,6 +23,7 @@ public class EngineTimer {
                 	running = false;
                     timer.stop();
                     inpEngine.setStartable(false);
+                    hintLabel.setText("The time to start the engine has expired! Re-enter the code.");
                 }
             }
         });
