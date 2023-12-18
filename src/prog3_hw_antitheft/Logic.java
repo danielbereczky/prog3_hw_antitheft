@@ -25,7 +25,7 @@ public class Logic {
 	IgnitionKey key = new IgnitionKey();
 	AlarmSiren siren = new AlarmSiren();
 	Engine carEngine = new Engine();
-	
+	//this line doesn't do anything
 	CountdownTimer timer;
 	EngineTimer engTimer;
 	
